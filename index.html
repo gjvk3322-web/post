@@ -13,7 +13,7 @@
         }
         .header { text-align: center; margin-bottom: 30px; }
         .input-section {
-            background: white; max-width: 600px; margin: 0 auto 30px;
+            background: white; max-width: 600px; margin: 30px auto;
             padding: 20px; border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
@@ -32,7 +32,7 @@
             max-width: 1000px; margin: 0 auto;
         }
         .post-it {
-            width: 200px; min-height: 150px; padding: 15px;
+            width: 200px; min-height: 150px; padding: 25px 15px 15px 15px; 
             box-shadow: 3px 5px 10px rgba(0,0,0,0.15);
             font-size: 15px; line-height: 1.4; word-break: keep-all;
             position: relative;
@@ -56,6 +56,9 @@
         <p>우리 회사의 강점, 약점, 그리고 시급한 문제점을 눈치 보지 말고 솔직하게 적어주세요!</p>
     </div>
 
+    <div class="board" id="board">
+        </div>
+
     <div class="input-section">
         <textarea id="memoInput" placeholder="여기에 의견을 자유롭게 적어주세요 (익명 보장!)"></textarea>
         <div class="controls">
@@ -68,32 +71,28 @@
         </div>
     </div>
 
-    <div class="board" id="board">
-        </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        // 삭제 관련 기능(deleteDoc)을 다시 제거했습니다.
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } 
         from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 👇👇👇 여기에 1단계에서 복사해둔 내 파이어베이스 정보를 덮어쓰세요! 👇👇👇
+        // 👇👇👇 여기에 대표님의 파이어베이스 정보를 덮어써주세요! 👇👇👇
         const firebaseConfig = {
-              apiKey: "AIzaSyAjVerxCunFEIvkNfCOTDnedbO5YRVOma4",
-  authDomain: "dolbomnote-be438.firebaseapp.com",
-  projectId: "dolbomnote-be438",
-  storageBucket: "dolbomnote-be438.firebasestorage.app",
-  messagingSenderId: "772276336020",
-  appId: "1:772276336020:web:b4f2d5659406d813350b81",
-  measurementId: "G-232HEJ5RKM"
+            apiKey: "AIzaSyXXXXXXXXXXXXXXX",
+            authDomain: "내프로젝트.firebaseapp.com",
+            projectId: "내프로젝트",
+            storageBucket: "내프로젝트.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdefg"
         };
         // 👆👆👆 ========================================================= 👆👆👆
 
-        // 파이어베이스 초기화
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const postItsCollection = collection(db, "postits");
 
-        // [기능 1] 포스트잇 추가하기 (DB에 저장)
+        // [기능 1] 포스트잇 추가하기
         document.getElementById('submitBtn').addEventListener('click', async () => {
             const textInput = document.getElementById('memoInput');
             const colorClass = document.getElementById('colorSelect').value;
@@ -104,27 +103,24 @@
                 return;
             }
 
-            // DB에 데이터 넣기
             await addDoc(postItsCollection, {
                 content: text,
                 color: colorClass,
                 date: new Date().toLocaleDateString(),
-                timestamp: Date.now() // 최신순 정렬을 위한 시간
+                timestamp: Date.now()
             });
 
-            textInput.value = ''; // 입력창 비우기
+            textInput.value = ''; 
         });
 
-        // [기능 2] 실시간으로 DB에서 데이터 가져와서 화면에 그리기
+        // [기능 2] 화면에 포스트잇 실시간 그리기 (삭제 버튼 제거됨)
         const q = query(postItsCollection, orderBy("timestamp", "desc"));
         onSnapshot(q, (snapshot) => {
             const board = document.getElementById('board');
-            board.innerHTML = ''; // 기존 화면 지우기 (중복 방지)
+            board.innerHTML = ''; 
 
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                
-                // 줄바꿈 처리 및 보안 처리
+            snapshot.forEach((firebaseDoc) => {
+                const data = firebaseDoc.data();
                 const safeText = data.content.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, '<br>');
 
                 const postItHTML = `
