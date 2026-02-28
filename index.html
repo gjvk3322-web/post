@@ -28,7 +28,7 @@
             position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
         }
         .progress-bar {
-            height: 100%; width: 0%; /* 기본 0%, 자바스크립트로 채움 */
+            height: 100%; width: 0%; 
             background: linear-gradient(90deg, #ff8787, #e03131);
             transition: width 0.5s ease-out;
         }
@@ -39,8 +39,53 @@
             text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
         }
 
+        /* 📌 겹쳐지는 보드 스타일 (무조건 가로 4개) */
+        .board {
+            display: flex; flex-wrap: wrap; justify-content: flex-start; /* 왼쪽부터 차례대로 */
+            max-width: 1000px; margin: 0 auto 30px auto; /* 입력창과 간격 띄우기 */
+            padding: 20px 10px;
+        }
+        
+        .post-it {
+            width: calc(25% - 10px); /* 💡 핵심: 100%를 4등분 하고 여백을 뺌 = 무조건 4개 배치 */
+            margin: -15px 5px; /* 위아래는 마이너스로 겹치고, 좌우는 5px씩 띄움 */
+            min-height: 140px; 
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.2);
+            font-size: 14px; line-height: 1.4; word-break: keep-all;
+            position: relative; box-sizing: border-box;
+            background-color: white;
+            z-index: 1;
+            transition: transform 0.3s ease, z-index 0s, box-shadow 0.3s ease;
+        }
+
+        /* ✨ 터치 시 맨 앞으로 튀어나오는 효과 */
+        .post-it:hover, .post-it:active {
+            z-index: 100; 
+            transform: scale(1.15) rotate(0deg) !important; 
+            box-shadow: 5px 15px 25px rgba(0,0,0,0.3);
+        }
+
+        .post-it:nth-child(even) { transform: rotate(3deg); }
+        .post-it:nth-child(3n) { transform: rotate(-2deg); }
+        .post-it:nth-child(5n) { transform: rotate(1deg); }
+
+        .post-it-header {
+            width: 100%; height: 25px; padding: 0 5px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: bold; color: white;
+            box-sizing: border-box; text-align: center; letter-spacing: -0.5px;
+        }
+        .post-it-body { padding: 15px 10px; }
+        
+        .bg-blue { background-color: #74c0fc; } .bg-blue-body { background-color: #d0ebff; }
+        .bg-yellow { background-color: #fcc419; } .bg-yellow-body { background-color: #fff3bf; }
+        .bg-red { background-color: #ffa8a8; } .bg-red-body { background-color: #ffe3e3; }
+        
+        .date { font-size: 10px; color: #666; position: absolute; bottom: 8px; right: 10px; }
+
+        /* 입력창 스타일 */
         .input-section {
-            background: white; max-width: 600px; margin: 0 auto 30px auto;
+            background: white; max-width: 600px; margin: 0 auto 50px auto;
             padding: 20px; border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
@@ -52,63 +97,19 @@
         select, button { padding: 10px 15px; border-radius: 5px; border: 1px solid #ccc; font-weight: bold; }
         button { background-color: #333; color: white; cursor: pointer; border: none; }
         button:hover { background-color: #555; }
-        
-        /* 📌 겹쳐지는 보드 스타일 */
-        .board {
-            display: flex; flex-wrap: wrap; justify-content: center;
-            max-width: 1000px; margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .post-it {
-            width: 180px; min-height: 140px; 
-            box-shadow: 2px 4px 8px rgba(0,0,0,0.2);
-            font-size: 14px; line-height: 1.4; word-break: keep-all;
-            position: relative; box-sizing: border-box;
-            background-color: white;
-            /* 핵심: 서로 겹쳐지게 만드는 마이너스 여백 */
-            margin: -15px -10px; 
-            z-index: 1;
-            /* 터치 시 부드럽게 튀어나오는 애니메이션 */
-            transition: transform 0.3s ease, z-index 0s, box-shadow 0.3s ease;
-        }
 
-        /* ✨ 마우스 오버 & 터치 시 맨 앞으로 튀어나오는 효과 */
-        .post-it:hover, .post-it:active {
-            z-index: 100; /* 맨 앞으로 가져오기 */
-            transform: scale(1.15) rotate(0deg) !important; /* 크기 키우고 똑바로 세우기 */
-            box-shadow: 5px 15px 25px rgba(0,0,0,0.3);
-        }
-
-        /* 약간씩 삐뚤어지게 배치 (랜덤한 느낌) */
-        .post-it:nth-child(even) { transform: rotate(4deg); }
-        .post-it:nth-child(3n) { transform: rotate(-3deg); }
-        .post-it:nth-child(5n) { transform: rotate(2deg); }
-
-        /* 카테고리 띠지 및 배경색 */
-        .post-it-header {
-            width: 100%; height: 25px; padding: 0 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: bold; color: white;
-            box-sizing: border-box;
-        }
-        .post-it-body { padding: 15px; }
-        
-        .bg-blue { background-color: #74c0fc; } .bg-blue-body { background-color: #d0ebff; }
-        .bg-yellow { background-color: #fcc419; } .bg-yellow-body { background-color: #fff3bf; }
-        .bg-red { background-color: #ffa8a8; } .bg-red-body { background-color: #ffe3e3; }
-        
-        .date { font-size: 10px; color: #666; position: absolute; bottom: 8px; right: 10px; }
-
-        /* 📱 모바일 화면 최적화 */
+        /* 📱 모바일 화면 최적화 (모바일에서도 4개 유지) */
         @media screen and (max-width: 600px) {
             .post-it {
-                width: 140px; /* 모바일에서는 포스트잇 크기를 줄여서 많이 보이게 */
-                min-height: 120px;
-                font-size: 12px;
-                margin: -20px -8px; /* 모바일에서 더 촘촘하게 겹침 */
+                width: calc(25% - 4px); /* 모바일에서도 4열 강제 유지 */
+                margin: -10px 2px; /* 겹침 간격 축소 */
+                min-height: 100px;
+                font-size: 11px; /* 4개가 들어가야 하므로 글자 크기 축소 */
             }
-            .post-it-header { font-size: 10px; }
+            .post-it-header { font-size: 9px; padding: 0 2px; }
+            .post-it-body { padding: 10px 5px; }
+            .date { font-size: 8px; bottom: 4px; right: 5px; }
+            
             .input-section { margin: 15px; padding: 15px; }
             .controls { flex-direction: column; gap: 10px; }
             select, button { width: 100%; box-sizing: border-box; }
@@ -130,6 +131,9 @@
         </div>
     </div>
 
+    <div class="board" id="board">
+        </div>
+
     <div class="input-section">
         <textarea id="memoInput" placeholder="여기에 의견을 자유롭게 적어주세요 (익명 보장!)"></textarea>
         <div class="controls">
@@ -141,9 +145,6 @@
             <button id="submitBtn">포스트잇 붙이기</button>
         </div>
     </div>
-
-    <div class="board" id="board">
-        </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -200,16 +201,13 @@
             const board = document.getElementById('board');
             board.innerHTML = ''; 
 
-            // 🚀 게이지(프로그레스 바) 로직
-            const totalCount = snapshot.size; // 현재 작성된 포스트잇 개수
-            const targetCount = 500; // 목표 개수
-            const percent = Math.min((totalCount / targetCount) * 100, 100); // 100% 넘지 않게
+            const totalCount = snapshot.size; 
+            const targetCount = 500; 
+            const percent = Math.min((totalCount / targetCount) * 100, 100); 
 
-            // 게이지 바 애니메이션 채우기
             document.getElementById('progressBar').style.width = percent + '%';
             document.getElementById('progressText').innerText = `현재 ${totalCount}개 작성 완료! (${Math.floor(percent)}%) - 목표까지 ${targetCount - totalCount}개 남았습니다!`;
 
-            // 포스트잇 화면에 그리기
             snapshot.forEach((firebaseDoc) => {
                 const data = firebaseDoc.data();
                 const safeText = data.content.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, '<br>');
