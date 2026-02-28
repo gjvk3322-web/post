@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 회사 익명 신문고 & 포스트잇</title>
+    <style>
+        body {
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+            background-color: #e9ecef; 
+            margin: 0; padding: 20px;
+            color: #333;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .input-section {
+            background: white; max-width: 600px; margin: 0 auto 30px;
+            padding: 20px; border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%; height: 80px; padding: 10px; border: 1px solid #ddd;
+            border-radius: 5px; box-sizing: border-box; resize: none; margin-bottom: 15px;
+        }
+        .controls { display: flex; justify-content: space-between; align-items: center; }
+        select, button { padding: 10px 15px; border-radius: 5px; border: 1px solid #ccc; font-weight: bold; }
+        button { background-color: #333; color: white; cursor: pointer; border: none; }
+        button:hover { background-color: #555; }
+        
+        /* 포스트잇 보드 영역 */
+        .board {
+            display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;
+            max-width: 1000px; margin: 0 auto;
+        }
+        .post-it {
+            width: 200px; min-height: 150px; padding: 15px;
+            box-shadow: 3px 5px 10px rgba(0,0,0,0.15);
+            font-size: 15px; line-height: 1.4; word-break: keep-all;
+            position: relative;
+            transform: rotate(-2deg); 
+        }
+        .post-it:nth-child(even) { transform: rotate(2deg); }
+        .post-it:nth-child(3n) { transform: rotate(-1deg); }
+
+        /* 카테고리별 색상 */
+        .bg-blue { background-color: #d0ebff; border-top: 15px solid #74c0fc; }
+        .bg-yellow { background-color: #fff3bf; border-top: 15px solid #fcc419; }
+        .bg-red { background-color: #ffe3e3; border-top: 15px solid #ffa8a8; }
+        
+        .date { font-size: 11px; color: #666; position: absolute; bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🗣️ 익명 포스트잇 보드</h1>
+        <p>우리 회사의 강점, 약점, 그리고 시급한 문제점을 눈치 보지 말고 솔직하게 적어주세요!</p>
+    </div>
+
+    <div class="input-section">
+        <textarea id="memoInput" placeholder="여기에 의견을 자유롭게 적어주세요 (익명 보장!)"></textarea>
+        <div class="controls">
+            <select id="colorSelect">
+                <option value="bg-blue">📘 우리 회사의 강점</option>
+                <option value="bg-yellow">📒 보완해야 할 약점</option>
+                <option value="bg-red">📕 시급하게 뜯어고칠 문제점</option>
+            </select>
+            <button id="submitBtn">포스트잇 붙이기</button>
+        </div>
+    </div>
+
+    <div class="board" id="board">
+        </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } 
+        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // 👇👇👇 여기에 1단계에서 복사해둔 내 파이어베이스 정보를 덮어쓰세요! 👇👇👇
+        const firebaseConfig = {
+              apiKey: "AIzaSyAjVerxCunFEIvkNfCOTDnedbO5YRVOma4",
+  authDomain: "dolbomnote-be438.firebaseapp.com",
+  projectId: "dolbomnote-be438",
+  storageBucket: "dolbomnote-be438.firebasestorage.app",
+  messagingSenderId: "772276336020",
+  appId: "1:772276336020:web:b4f2d5659406d813350b81",
+  measurementId: "G-232HEJ5RKM"
+        };
+        // 👆👆👆 ========================================================= 👆👆👆
+
+        // 파이어베이스 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const postItsCollection = collection(db, "postits");
+
+        // [기능 1] 포스트잇 추가하기 (DB에 저장)
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            const textInput = document.getElementById('memoInput');
+            const colorClass = document.getElementById('colorSelect').value;
+            const text = textInput.value.trim();
+
+            if (!text) {
+                alert("내용을 입력해주세요!");
+                return;
+            }
+
+            // DB에 데이터 넣기
+            await addDoc(postItsCollection, {
+                content: text,
+                color: colorClass,
+                date: new Date().toLocaleDateString(),
+                timestamp: Date.now() // 최신순 정렬을 위한 시간
+            });
+
+            textInput.value = ''; // 입력창 비우기
+        });
+
+        // [기능 2] 실시간으로 DB에서 데이터 가져와서 화면에 그리기
+        const q = query(postItsCollection, orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const board = document.getElementById('board');
+            board.innerHTML = ''; // 기존 화면 지우기 (중복 방지)
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                
+                // 줄바꿈 처리 및 보안 처리
+                const safeText = data.content.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, '<br>');
+
+                const postItHTML = `
+                    <div class="post-it ${data.color}">
+                        ${safeText}
+                        <div class="date">${data.date}</div>
+                    </div>
+                `;
+                board.insertAdjacentHTML('beforeend', postItHTML);
+            });
+        });
+    </script>
+</body>
+</html>
