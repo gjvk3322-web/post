@@ -47,6 +47,19 @@
         .bg-red { background-color: #ffe3e3; border-top: 15px solid #ffa8a8; }
         
         .date { font-size: 11px; color: #666; position: absolute; bottom: 10px; right: 10px; }
+        /* 📱 모바일 화면 최적화 (화면 폭이 600px 이하일 때 작동) */
+        @media screen and (max-width: 600px) {
+            .board { gap: 10px; }
+            .post-it {
+                width: calc(50% - 10px); /* 모바일에서는 2개씩 나란히 배치! */
+                min-height: 110px;
+                padding: 15px 10px 10px 10px;
+                font-size: 13px; /* 글씨 크기를 살짝 줄여서 가독성 확보 */
+            }
+            .input-section { margin: 15px; padding: 15px; }
+            .controls { flex-direction: column; gap: 10px; } /* 버튼을 아래로 내림 */
+            select, button { width: 100%; box-sizing: border-box; } /* 버튼이 꽉 차게 */
+        }
     </style>
 </head>
 <body>
